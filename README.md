@@ -1,2 +1,2 @@
-# JRebel4AndroidGettingStarted
-This is a sample application to see how JRebel for Android works
+# Meetup API with Retrofit
+This is a sample application to see explore the Meetup API with Retrofit 2
