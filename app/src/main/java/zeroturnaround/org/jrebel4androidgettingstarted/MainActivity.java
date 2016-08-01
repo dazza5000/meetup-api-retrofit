@@ -13,8 +13,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,17 +47,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+//        MeetupService meetupService = MeetupService.retrofit.create(MeetupService.class);
+//        final Call<Event> call =
+//                meetupService.getEvent("Friendly-Austin", "229556824");
+//        new NetworkCall().execute(call);
+
         MeetupService meetupService = MeetupService.retrofit.create(MeetupService.class);
-        final Call<Event> call =
-                meetupService.getEvent("Friendly-Austin", "229556824");
+        final Call<List<Event>> call =
+                meetupService.getEventsWithPizza();
         new NetworkCall().execute(call);
+
+
     }
 
     private class NetworkCall extends AsyncTask<Call, Void, String> {
         @Override
         protected String doInBackground(Call... params) {
             try {
-                return params[0].execute().body().toString();
+
+
+                Response response = params[0].execute();
+                return response.body().toString();
             } catch (IOException e) {
                 e.printStackTrace();
             }
