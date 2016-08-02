@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "619012757172",
+    "firebase_url": "https://pizza-meetup.firebaseio.com",
+    "project_id": "pizza-meetup",
+    "storage_bucket": "pizza-meetup.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:619012757172:android:e59ca973ba0f6ec2",
+        "android_client_info": {
+          "package_name": "zeroturnaround.org.jrebel4androidgettingstarted"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "619012757172-g3f64hvbj8lgu7uqjdts1v30jbkaflvo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQLpt2UilSvzQcMcOFLkfbyfHHc1t71P0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

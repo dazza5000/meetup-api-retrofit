@@ -13,8 +13,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import retrofit2.Call;
@@ -25,6 +35,8 @@ import static com.google.gson.internal.$Gson$Preconditions.checkNotNull;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG ="MainActivity";
+
     private RecyclerView eventsRecyclerView;
 
     @Override
@@ -33,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final DatabaseReference myRef = database.getReference("events");
+        myRef.keepSynced(true);
 
         eventsRecyclerView = (RecyclerView) findViewById(R.id.event_recycler_view);
         eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -46,9 +62,39 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Results> call, Response<Results> response) {
                 Results results = response.body();
-                Log.d("MainAct", "onResponse: " + results.getQuotes().get(0));
-                EventsAdapter adapter = new EventsAdapter(results.getQuotes());
+                Log.d(TAG, "Event count from API: " + results.getEvents().size());
+                final List<Event> eventsFromRest = results.getEvents();
+                EventsAdapter adapter = new EventsAdapter(eventsFromRest);
                 eventsRecyclerView.setAdapter(adapter);
+
+                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        List<Event> cleanEventArrayList = new ArrayList<>();
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                            Event event = postSnapshot.getValue(Event.class);
+
+
+                            Iterator<Event> iter = eventsFromRest.iterator();
+
+                            while (iter.hasNext()) {
+                                Event nextEvent = iter.next();
+                                if (event.getId().equals(nextEvent.getId()))
+                                    iter.remove();
+                            }
+
+
+                        }
+                        Log.d(TAG, "After cleaning we have this many events: " + eventsFromRest.size());
+                        EventsAdapter adapter = new EventsAdapter(eventsFromRest);
+                        eventsRecyclerView.setAdapter(adapter);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
 
             }
 
@@ -57,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+
 
 
     }
@@ -97,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         public EventsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             Context context = parent.getContext();
             LayoutInflater inflater = LayoutInflater.from(context);
-            View quoteView = inflater.inflate(R.layout.item_quote, parent, false);
+            View quoteView = inflater.inflate(R.layout.item_event, parent, false);
 
             return new EventsAdapter.ViewHolder(quoteView);
         }
@@ -107,11 +155,17 @@ public class MainActivity extends AppCompatActivity {
             Event event = events.get(position);
 
             viewHolder.author.setText(event.getName());
+            viewHolder.group.setText(event.getGroup().getName());
 
-            String description = event.getDescription().replaceAll("pizza","<font color='red'>"+"pizza"+"</font>");
-            description = description.replaceAll("Pizza","<font color='red'>"+"Pizza"+"</font>");
+            if (null != event.getDescription()) {
 
-            viewHolder.quote.setText(Html.fromHtml(description));
+                String description = event.getDescription().replaceAll("pizza", "<font color='red'>" + "PIZZA" + "</font>");
+                description = description.replaceAll("Pizza", "<font color='red'>" + "PIZZA" + "</font>");
+                description = description.replaceAll("provide", "<font color='red'>" + "PROVIDE" + "</font>");
+                description = description.replaceAll("provided", "<font color='red'>" + "PROVIDED" + "</font>");
+
+                viewHolder.quote.setText(Html.fromHtml(description));
+            }
 
             viewHolder.link.setText(event.getEvent_url());
 
@@ -138,16 +192,59 @@ public class MainActivity extends AppCompatActivity {
         public class ViewHolder extends RecyclerView.ViewHolder {
 
             private TextView author;
+            private TextView group;
             private TextView quote;
             private TextView link;
+            private Button addEvent;
+            private Button removeEvent;
 
 
             public ViewHolder(View itemView) {
                 super(itemView);
 
                 author = (TextView) itemView.findViewById(R.id.quote_author);
+                group = (TextView) itemView.findViewById(R.id.event_group_name);
                 quote = (TextView) itemView.findViewById(R.id.quote_text);
                 link = (TextView) itemView.findViewById(R.id.quote_link);
+                addEvent = (Button) itemView.findViewById(R.id.add_event);
+                removeEvent = (Button) itemView.findViewById(R.id.remove_event);
+
+                addEvent.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Event event = getItem(getAdapterPosition());
+                        event.setFood(true);
+
+                        String eventName = event.getName();
+
+                        FirebaseDatabase database = FirebaseDatabase.getInstance();
+                        DatabaseReference myRef = database.getReference("events");
+
+                        myRef.push().setValue(event);
+                        Toast.makeText(v.getContext(), eventName + " added!",
+                                Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+
+                removeEvent.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Event event = getItem(getAdapterPosition());
+                        event.setFood(false);
+
+                        String eventName = event.getName();
+
+                        FirebaseDatabase database = FirebaseDatabase.getInstance();
+                        DatabaseReference myRef = database.getReference("events");
+
+                        myRef.push().setValue(event);
+
+                        Toast.makeText(v.getContext(), eventName + " removed!",
+                                Toast.LENGTH_SHORT).show();
+
+                    }
+                });
 
             }
 

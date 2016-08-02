@@ -23,7 +23,7 @@ public class Results {
     /**
      * @return The quotes
      */
-    public List<Event> getQuotes() {
+    public List<Event> getEvents() {
         return quotes;
     }
 

@@ -19,7 +19,8 @@ interface MeetupService {
     Call<Event> getEvent(@Path("group_urlname") String group_urlname,
                                @Path("event_id") String event_id);
 
-    @GET("/2/open_events?key=781b7f155a7cb96457745d35a12412&sign=true&photo-host=public&zip=78731&text=pizza&page=100")
+//    @GET("/2/open_events?key=781b7f155a7cb96457745d35a12412&sign=true&photo-host=public&zip=78731&text=pizza&text=provide&text=provided&page=300")
+    @GET("/2/open_events?key=781b7f155a7cb96457745d35a12412&sign=true&photo-host=public&zip=78731&text=pizza&text=provided&page=300")
     Call<Results> getEventsWithPizza();
 
     public static final Retrofit retrofit = new Retrofit.Builder()
@@ -27,7 +28,7 @@ interface MeetupService {
             .addConverterFactory(GsonConverterFactory.create())
             .build();
 
-    // https://api.meetup.com/2/open_events?key=781b7f155a7cb96457745d35a12412&sign=true&photo-host=public&zip=78731&text=pizza&page=100
+    // https://api.meetup.com/2/open_events?key=781b7f155a7cb96457745d35a12412&sign=true&photo-host=public&zip=78731&text=pizza&text=provide&text=provided&page=300
 
 }
 

@@ -9,6 +9,9 @@ public class Event {
     private String event_url;
     private String id;
     private String time;
+    private Group group;
+
+    private boolean isFood;
 
 
     @Override
@@ -30,5 +33,20 @@ public class Event {
 
     public String getId() {
         return id;
+    }
+
+    public void setFood(boolean food) {
+        isFood = food;
+    }
+    public String getTime() {
+        return time;
+    }
+
+    public boolean isFood() {
+        return isFood;
+    }
+
+    public Group getGroup() {
+        return group;
     }
 }
