@@ -1,24 +1,31 @@
 package zeroturnaround.org.jrebel4androidgettingstarted;
 
-import android.os.AsyncTask;
+import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.google.gson.internal.$Gson$Preconditions.checkNotNull;
+
 public class MainActivity extends AppCompatActivity {
+
+    private RecyclerView eventsRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,60 +34,33 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Super fast hello world from JRebel for Android", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        eventsRecyclerView = (RecyclerView) findViewById(R.id.event_recycler_view);
+        eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        Button button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MeetupService meetupService = MeetupService.retrofit.create(MeetupService.class);
-                final Call<Event> call =
-                        meetupService.getEvent("Friendly-Austin", "229556824");
-                new NetworkCall().execute(call);
-            }
-        });
-
-//        MeetupService meetupService = MeetupService.retrofit.create(MeetupService.class);
-//        final Call<Event> call =
-//                meetupService.getEvent("Friendly-Austin", "229556824");
-//        new NetworkCall().execute(call);
 
         MeetupService meetupService = MeetupService.retrofit.create(MeetupService.class);
-        final Call<List<Event>> call =
+        Call<Results> call =
                 meetupService.getEventsWithPizza();
-        new NetworkCall().execute(call);
 
+        call.enqueue(new Callback<Results>() {
+            @Override
+            public void onResponse(Call<Results> call, Response<Results> response) {
+                Results results = response.body();
+                Log.d("MainAct", "onResponse: " + results.getQuotes().get(0));
+                EventsAdapter adapter = new EventsAdapter(results.getQuotes());
+                eventsRecyclerView.setAdapter(adapter);
 
-    }
-
-    private class NetworkCall extends AsyncTask<Call, Void, String> {
-        @Override
-        protected String doInBackground(Call... params) {
-            try {
-
-
-                Response response = params[0].execute();
-                return response.body().toString();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
 
-            return null;
-        }
+            @Override
+            public void onFailure(Call<Results> call, Throwable t) {
 
-        @Override
-        protected void onPostExecute(String result) {
-            final TextView textView = (TextView) findViewById(R.id.textView);
-            textView.setText(result);
-        }
+            }
+        });
+
+
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -102,5 +82,75 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private static class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder> {
+
+        private List<Event> events;
+
+
+        public EventsAdapter(List<Event> events) {
+            setList(events);
+        }
+
+        @Override
+        public EventsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            Context context = parent.getContext();
+            LayoutInflater inflater = LayoutInflater.from(context);
+            View quoteView = inflater.inflate(R.layout.item_quote, parent, false);
+
+            return new EventsAdapter.ViewHolder(quoteView);
+        }
+
+        @Override
+        public void onBindViewHolder(EventsAdapter.ViewHolder viewHolder, int position) {
+            Event event = events.get(position);
+
+            viewHolder.author.setText(event.getName());
+
+            String description = event.getDescription().replaceAll("pizza","<font color='red'>"+"pizza"+"</font>");
+            description = description.replaceAll("Pizza","<font color='red'>"+"Pizza"+"</font>");
+
+            viewHolder.quote.setText(Html.fromHtml(description));
+
+            viewHolder.link.setText(event.getEvent_url());
+
+        }
+
+        private void setList(List<Event> quotes) {
+            events = checkNotNull(quotes);
+        }
+
+        public void replaceData(List<Event> quotes){
+            setList(quotes);
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public int getItemCount() {
+            return events.size();
+        }
+
+        public Event getItem(int position) {
+            return events.get(position);
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+
+            private TextView author;
+            private TextView quote;
+            private TextView link;
+
+
+            public ViewHolder(View itemView) {
+                super(itemView);
+
+                author = (TextView) itemView.findViewById(R.id.quote_author);
+                quote = (TextView) itemView.findViewById(R.id.quote_text);
+                link = (TextView) itemView.findViewById(R.id.quote_link);
+
+            }
+
+        }
     }
 }
