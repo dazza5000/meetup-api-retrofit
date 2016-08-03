@@ -30,6 +30,8 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static com.google.gson.internal.$Gson$Preconditions.checkNotNull;
 
@@ -54,7 +56,13 @@ public class MainActivity extends AppCompatActivity {
         eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
-        MeetupService meetupService = MeetupService.retrofit.create(MeetupService.class);
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.meetup.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+
+        MeetupService meetupService = retrofit.create(MeetupService.class);
         Call<Results> call =
                 meetupService.getEventsWithPizza();
 

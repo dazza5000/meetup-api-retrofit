@@ -5,5 +5,5 @@ package zeroturnaround.org.jrebel4androidgettingstarted;
  */
 
 public class Constants {
-    public static final String MEETUP_KEY = "";
+    public static final String MEETUP_KEY = "781b7f155a7cb96457745d35a1241";
 }

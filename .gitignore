@@ -35,3 +35,5 @@ proguard/
 # Log Files
 *.log
 google-services.json
+Constants.java
+
