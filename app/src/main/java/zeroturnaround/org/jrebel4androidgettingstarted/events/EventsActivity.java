@@ -234,7 +234,7 @@ public class EventsActivity extends AppCompatActivity
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             Context context = parent.getContext();
             LayoutInflater inflater = LayoutInflater.from(context);
-            View EventView = inflater.inflate(R.layout.item_event, parent, false);
+            View EventView = inflater.inflate(R.layout.event_choose_item, parent, false);
 
             return new ViewHolder(EventView, mItemListener);
         }

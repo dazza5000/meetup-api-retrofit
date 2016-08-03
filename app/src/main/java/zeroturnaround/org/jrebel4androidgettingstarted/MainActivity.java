@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         public EventsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             Context context = parent.getContext();
             LayoutInflater inflater = LayoutInflater.from(context);
-            View quoteView = inflater.inflate(R.layout.item_event, parent, false);
+            View quoteView = inflater.inflate(R.layout.event_choose_item, parent, false);
 
             return new EventsAdapter.ViewHolder(quoteView);
         }
